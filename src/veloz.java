@@ -7,11 +7,16 @@ import javax.imageio.*;
 
 
 public class veloz {
-	public static final int NUM_OF_IMAGE_TO_SAVE = 10;
-	public static String getResults(int start, String key, String query) throws Exception {
-		
+	private static final int NUM_OF_IMAGE_TO_SAVE = 10;
+	private static final String key="AIzaSyCWj0r9SAYuz25Si_XRk-_zQ5hVgXPpOJM";
+    private static final String qry="aeron";
+    private static final String cx = "014479037408042406474:eqp9oalv2lu";
+
+	// Returns 10 search results (JSON format) for specified API key, query, start index and custom search engine id (cx).
+	public static String getResults( String key, String query, int start, String cx) throws Exception {
+
 		URL url = new URL(
-	            "https://www.googleapis.com/customsearch/v1?key="+key+ "&cx=014479037408042406474:eqp9oalv2lu&q="+ query + "&searchType=image&num=10&start=" + start);
+	            "https://www.googleapis.com/customsearch/v1?key="+key+ "&cx="+ cx + "&q="+ query + "&searchType=image&num=10&start=" + start);
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod("GET");
 	    BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
@@ -23,12 +28,10 @@ public class veloz {
 	    conn.disconnect();
 	    return response.toString();
 	}
+
+	// Saves the image in the specified url to the specified destination file.
 	public static void saveImage(String imageUrl, String destinationFile) throws IOException {
-		/*URL url = new URL(imageUrl);
-		BufferedImage image = ImageIO.read(url);
-		File f = new File(destinationFile);
-		f.setWritable(true);*/
-		//ImageIO.write(image, destinationFile.substring(destinationFile.lastIndexOf(".")+1), f);
+
 		URL url = new URL(imageUrl);
 		InputStream is = url.openStream();
 		OutputStream os = new FileOutputStream(destinationFile);
@@ -42,44 +45,35 @@ public class veloz {
 
 		is.close();
 		os.close();
-		
+
 	}
-	
-	
-	
-	
+
 	public static void main(String[] args) throws Exception {
-		String key="AIzaSyCWj0r9SAYuz25Si_XRk-_zQ5hVgXPpOJM";
-	    String qry="aeron";
 	    int start = 1;
 	    int count = 1;
 	    int count2 = 0;
 	    String res = "";
 	    System.out.println("Output from Server .... \n");
-	    String url = "http://www.davidcraddock.net/wp-content/uploads/2013/12/hero_aeron_work_1.jpg";
-	    File f = new File(url);
-	    System.out.println(f.getAbsolutePath());
-	    String imageFile = url.substring(url.lastIndexOf("/")+1);
-	    saveImage(url, imageFile);
-	    /*while(count <= NUM_OF_IMAGE_TO_SAVE/10) {
-	    	
-	    	res = getResults(start, key, qry);
+	    while(count <= NUM_OF_IMAGE_TO_SAVE/10) {
+
+	    	res = getResults(key, qry, start, cx);
 	    	String[] lines = res.split("\n");
 
 	    	int i = 0;
+	    	// Find the links in the search results and save the images from those links
 	    	while (i<lines.length) {
-		        if(lines[i].contains("\"link\": \"")){                
+		        if(lines[i].contains("\"link\": \"")){
+		        	// Obtain the link of the image
 		            String link=lines[i].substring(lines[i].indexOf("\"link\": \"")+("\"link\": \"").length(), lines[i].indexOf("\","));
-		            String size=lines[i].substring(lines[i].indexOf("\"link\": \"")+("\"link\": \"").length(), lines[i].indexOf("\","));
-		            System.out.println(link);       //Will print the google search links
-		            count2++;
-		        } 
+		            // Obtain the name of the image
+		            String image_name = link.substring(link.lastIndexOf("/")+1);
+		            // Save image
+		            saveImage(link, image_name);
+		        }
 		        i++;
 	    	}
 	    	count++;
 	    	start += 10;
-	    } 
-	    System.out.println(count2);*/
-	                       
+	    }
 	}
 }
