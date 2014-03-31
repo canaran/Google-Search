@@ -1,23 +1,21 @@
 import java.io.*;
 import java.net.*;
 
-
-
 public class GoogleSearch {
 	/* Number of images to save is limited because Google Custom Search API does not let me 
-	* to see the results with start index > 100. I need to pay for that. Thus, NUM_OF_IMAGE_TO_SAVE variable
+	* to see the results with start index > 100. I needed to pay an amount for that. Thus, NUM_OF_IMAGE_TO_SAVE variable
 	* can be in the range of 1-100.
 	*/
-	private static final int NUM_OF_IMAGE_TO_SAVE = 10;				// Number of images to save in the current directory
+	private static final int NUM_OF_IMAGE_TO_SAVE = 12;				// Number of images to save in the current directory
 	private static final String key="AIzaSyCWj0r9SAYuz25Si_XRk-_zQ5hVgXPpOJM";	// Google Custom Search API key 
 	private static final String qry="aeron";					// Query for the search
 	private static final String cx = "014479037408042406474:e7m5zbvlphe";		// The custom search engine ID
-
-	// Returns search results (JSON format) in each call for specified API key, query, start index, number of results and custom search engine id (cx).
-	public static String getResults( String key, String query, int start, String cx, int num) throws Exception {
+	
+	// Returns search results (JSON format) in each call for specified API key, query, start index and custom search engine id (cx).
+	public static String getResults( String key, String query, int start, String cx, int num) throws IOException {
 		
 		URL url = new URL(	// Construct the URL
-	            "https://www.googleapis.com/customsearch/v1?key="+key+ "&cx="+ cx + "&q="+ query + "&searchType=image&num=" + num + "&start=" + start );
+	            "https://www.googleapis.com/customsearch/v1?key="+key+ "&cx="+ cx + "&q="+ query + "&searchType=image&num="+num +"&start=" + start);
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();			// Open the connection
 		conn.setRequestMethod("GET");
 		BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));	// Get the stream
@@ -40,7 +38,7 @@ public class GoogleSearch {
 		InputStream is = url.openStream();				// Open an input stream
 		OutputStream os = new FileOutputStream(destinationFile);	// Open an output stream to write/save the image data.
 
-		byte[] b = new byte[2048];	// Initialize the byte chunk
+		byte[] b = new byte[4096];	// Initialize the byte chunk
 		int length;
 
 		while ((length = is.read(b)) != -1) {
@@ -52,8 +50,23 @@ public class GoogleSearch {
 		os.close();
 
 	}
+	// Find the links in the search results and save the images from those links
+	public static void findLinksAndSave(String [] response) throws IOException {
+		int i = 0;
+	    	while (i<response.length) {
+		        if(response[i].contains("\"link\": \"")){
+				// Obtain the link of the image
+				String link=response[i].substring(response[i].indexOf("\"link\": \"")+("\"link\": \"").length(), response[i].indexOf("\","));
+				// Obtain the name of the image
+				String image_name = link.substring(link.lastIndexOf("/")+1);
+				// Save image
+				saveImage(link, image_name);
+		        }
+		        i++;
+	    	}
+	}
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws IOException {
 		int start = 1;
 		int count = 1;
 		String res = "";
@@ -62,25 +75,13 @@ public class GoogleSearch {
 		/*
 		* if we want to retrieve and save less than 10 images.
 		*/
-		
 		if (NUM_OF_IMAGE_TO_SAVE < 10 && NUM_OF_IMAGE_TO_SAVE > 0) {
 			res = getResults(key, qry, start, cx, NUM_OF_IMAGE_TO_SAVE);
 			lines = res.split("\n");	
 		
-		    	
 		    	// Find the links in the search results and save the images from those links
-		    	int i = 0;
-		    	while (i<lines.length) {
-			        if(lines[i].contains("\"link\": \"")){
-					// Obtain the link of the image
-					String link=lines[i].substring(lines[i].indexOf("\"link\": \"")+("\"link\": \"").length(), lines[i].indexOf("\","));
-					// Obtain the name of the image
-					String image_name = link.substring(link.lastIndexOf("/")+1);
-					// Save image
-					saveImage(link, image_name);
-			        }
-			        i++;
-		    	}	
+		    	findLinksAndSave(lines);
+			System.out.println("Images are saved.");	
 		} 
 		/*
 		* In Google Custom API, maximum number of results to recieve in one call is 10. 
@@ -90,25 +91,14 @@ public class GoogleSearch {
 			while(count <= NUM_OF_IMAGE_TO_SAVE/10) {
 				
 				// Get the image results for "aeron"
-			    	res = getResults(key, qry, start, cx, 10);
-			    	lines = res.split("\n");	
-			
-			    	
-			    	// Find the links in the search results and save the images from those links
-			    	int i = 0;
-			    	while (i<lines.length) {
-				        if(lines[i].contains("\"link\": \"")){
-						// Obtain the link of the image
-						String link=lines[i].substring(lines[i].indexOf("\"link\": \"")+("\"link\": \"").length(), lines[i].indexOf("\","));
-						// Obtain the name of the image
-						String image_name = link.substring(link.lastIndexOf("/")+1);
-						// Save image
-						saveImage(link, image_name);
-				        }
-				        i++;
-			    	}
-			    count++;
-			    start += 10;
+				res = getResults(key, qry, start, cx, 10);
+				lines = res.split("\n");	
+
+				// Find the links in the search results and save the images from those links
+				findLinksAndSave(lines);
+
+				count++;
+				start += 10;
 			}
 			
 			// if there are more images to save, get them and save them.
@@ -118,21 +108,12 @@ public class GoogleSearch {
 				res = getResults(key, qry, start, cx, rest);
 				lines = res.split("\n");	
 			
-			    	
 			    	// Find the links in the search results and save the images from those links
-			    	int i = 0;
-			    	while (i<lines.length) {
-				        if(lines[i].contains("\"link\": \"")){
-						// Obtain the link of the image
-						String link=lines[i].substring(lines[i].indexOf("\"link\": \"")+("\"link\": \"").length(), lines[i].indexOf("\","));
-						// Obtain the name of the image
-						String image_name = link.substring(link.lastIndexOf("/")+1);
-						// Save image
-						saveImage(link, image_name);
-				        }
-				        i++;
-			    	}
+			    	findLinksAndSave(lines);
 			}
+			System.out.println("Images are saved.");
+		} else {
+			System.out.println("NUM_OF_IMAGE_TO_SAVE should be in the range of 1-100");		
 		}
 		
 	}
