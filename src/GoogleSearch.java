@@ -13,7 +13,7 @@ public class GoogleSearch {
 	private static final String qry="aeron";					// Query for the search
 	private static final String cx = "014479037408042406474:eqp9oalv2lu";		// The custom search engine ID
 
-	// Returns search results (JSON format) in each call for specified API key, query, start index and custom search engine id (cx).
+	// Returns search results (JSON format) in each call for specified API key, query, start index, number of results and custom search engine id (cx).
 	public static String getResults( String key, String query, int start, String cx, int num) throws Exception {
 		
 		URL url = new URL(	// Construct the URL
