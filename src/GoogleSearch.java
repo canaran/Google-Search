@@ -62,7 +62,7 @@ public class GoogleSearch {
 				String image_name = link.substring(link.lastIndexOf("/")+1);
 				// Save image
 				try {
-				saveImage(link, image_name);
+					saveImage(link, image_name);
 				} catch(IOException e) {
 					System.out.println("Server returned:" + e.getMessage() + " for the link: " + link);
 					System.out.println("Image cannot be saved");
