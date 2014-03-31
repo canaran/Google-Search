@@ -11,7 +11,7 @@ public class GoogleSearch {
 	private static final int NUM_OF_IMAGE_TO_SAVE = 10;				// Number of images to save in the current directory
 	private static final String key="AIzaSyCWj0r9SAYuz25Si_XRk-_zQ5hVgXPpOJM";	// Google Custom Search API key 
 	private static final String qry="aeron";					// Query for the search
-	private static final String cx = "014479037408042406474:eqp9oalv2lu";		// The custom search engine ID
+	private static final String cx = "014479037408042406474:e7m5zbvlphe";		// The custom search engine ID
 
 	// Returns search results (JSON format) in each call for specified API key, query, start index, number of results and custom search engine id (cx).
 	public static String getResults( String key, String query, int start, String cx, int num) throws Exception {
