@@ -17,7 +17,7 @@ public class GoogleSearch {
 	public static String getResults( String key, String query, int start, String cx, int num) throws Exception {
 		
 		URL url = new URL(	// Construct the URL
-	            "https://www.googleapis.com/customsearch/v1?key="+key+ "&cx="+ cx + "&q="+ query + "&searchType=image&num=10&start=" + start + "&num=" + num);
+	            "https://www.googleapis.com/customsearch/v1?key="+key+ "&cx="+ cx + "&q="+ query + "&searchType=image&num=" + num + "&start=" + start );
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();			// Open the connection
 		conn.setRequestMethod("GET");
 		BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));	// Get the stream
