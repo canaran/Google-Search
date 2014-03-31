@@ -3,13 +3,14 @@ import java.net.*;
 
 public class GoogleSearch {
 	/* Number of images to save is limited because Google Custom Search API does not let me 
-	* to see the results with start index > 100. I needed to pay an amount for that. Thus, NUM_OF_IMAGE_TO_SAVE variable
+	* to see the results with start index > 100. I need to pay for that. Thus, NUM_OF_IMAGE_TO_SAVE variable
 	* can be in the range of 1-100.
 	*/
-	private static final int NUM_OF_IMAGE_TO_SAVE = 12;				// Number of images to save in the current directory
+	private static final int NUM_OF_IMAGE_TO_SAVE = 7;				// Number of images to save in the current directory
 	private static final String key="AIzaSyCWj0r9SAYuz25Si_XRk-_zQ5hVgXPpOJM";	// Google Custom Search API key 
 	private static final String qry="aeron";					// Query for the search
 	private static final String cx = "014479037408042406474:e7m5zbvlphe";		// The custom search engine ID
+	private static int errors = 0;						
 	
 	// Returns search results (JSON format) in each call for specified API key, query, start index and custom search engine id (cx).
 	public static String getResults( String key, String query, int start, String cx, int num) throws IOException {
@@ -60,13 +61,20 @@ public class GoogleSearch {
 				// Obtain the name of the image
 				String image_name = link.substring(link.lastIndexOf("/")+1);
 				// Save image
+				try {
 				saveImage(link, image_name);
+				} catch(IOException e) {
+					System.out.println("Server returned:" + e.getMessage() + " for the link: " + link);
+					System.out.println("Image cannot be saved");
+					errors++;				
+				}
 		        }
 		        i++;
 	    	}
 	}
 
 	public static void main(String[] args) throws IOException {
+		
 		int start = 1;
 		int count = 1;
 		String res = "";
@@ -81,7 +89,10 @@ public class GoogleSearch {
 		
 		    	// Find the links in the search results and save the images from those links
 		    	findLinksAndSave(lines);
-			System.out.println("Images are saved.");	
+			if(errors==0)
+				System.out.println(NUM_OF_IMAGE_TO_SAVE + " images are saved.");
+			else
+				System.out.println(errors +" out of " + NUM_OF_IMAGE_TO_SAVE + " images cannot be downloaded and saved because of the server response. Other images are saved.");	
 		} 
 		/*
 		* In Google Custom API, maximum number of results to recieve in one call is 10. 
@@ -111,7 +122,10 @@ public class GoogleSearch {
 			    	// Find the links in the search results and save the images from those links
 			    	findLinksAndSave(lines);
 			}
-			System.out.println("Images are saved.");
+			if(errors==0)
+				System.out.println(NUM_OF_IMAGE_TO_SAVE + " images are saved.");
+			else
+				System.out.println(errors + " out of " + NUM_OF_IMAGE_TO_SAVE + " images cannot be downloaded and saved because of the server response. Other images are saved.");
 		} else {
 			System.out.println("NUM_OF_IMAGE_TO_SAVE should be in the range of 1-100");		
 		}
