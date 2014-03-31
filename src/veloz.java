@@ -51,7 +51,6 @@ public class veloz {
 	public static void main(String[] args) throws Exception {
 		int start = 1;
 		int count = 1;
-		int count2 = 0;
 		String res = "";
 		System.out.println("Output from Server .... \n");
 		while(count <= NUM_OF_IMAGE_TO_SAVE/10) {
